@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Qdebulois\ByteSurgeon\Struct;
 
+use Qdebulois\ByteSurgeon\Enum\StructModelEnum;
 use Qdebulois\ByteSurgeon\Enum\StructTypeEnum;
 
 class Struct
 {
     private bool $isPopulated = false;
+    private ?StructModelEnum $model = null;
     private array $data;
     private array $fields       = [];
     private array $sizedStructs = [
@@ -47,6 +49,27 @@ class Struct
         )."\n";
     }
 
+    public function setModel(StructModelEnum $model): self
+    {
+        $this->model = $model;
+
+        return $this;
+    }
+
+    public function getModel(): ?StructModelEnum
+    {
+        return $this->model;
+    }
+
+    public function listFields(): array
+    {
+        return $this->fields;
+    }
+
+    public function isPopulated(): bool
+    {
+        return $this->isPopulated;
+    }
     public function addField(StructTypeEnum $type, string $name, ?int $size = null): self
     {
         if (isset($this->fields[$name])) {
@@ -69,16 +92,6 @@ class Struct
         $this->fields[$name] = ['type' => $type, 'size' => $size ? (string)$size : ''];
 
         return $this;
-    }
-
-    public function listFields(): array
-    {
-        return $this->fields;
-    }
-
-    public function isPopulated(): bool
-    {
-        return $this->isPopulated;
     }
 
     public function read(string $bin, int $offset = 0): int

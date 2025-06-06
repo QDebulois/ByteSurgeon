@@ -22,6 +22,8 @@ class StructModelFactory
     private function makeElfHeader(): Struct
     {
         return (new Struct())
+            ->setModel(StructModelEnum::ELF_HEADER)
+
             // Magic identifier and basic info (16 bytes)
             ->addField(StructTypeEnum::HEX_STRING, 'e_ident', 16)
 
@@ -69,6 +71,8 @@ class StructModelFactory
     private function makeElfProgramHeader(): Struct
     {
         return (new Struct())
+            ->setModel(StructModelEnum::ELF_PROGRAM_HEADER)
+
             // Segment type - 4 bytes
             ->addField(StructTypeEnum::HEX_STRING, 'p_type', 4)
 
@@ -98,6 +102,8 @@ class StructModelFactory
     private function makeElfSectionHeader(): Struct
     {
         return (new Struct())
+            ->setModel(StructModelEnum::ELF_SECTION_HEADER)
+
             // Offset in the section header string table - 4 bytes
             ->addField(StructTypeEnum::UINT32, 'sh_name')
 

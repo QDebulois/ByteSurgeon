@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qdebulois\ByteSurgeon\Enum;
 
-enum ElfSectionNameEnum: string
+enum ElfSectionEnum: string
 {
     // Executable code (machine instructions) Core program logic, usually read + exec
     case TEXT = '.text';
