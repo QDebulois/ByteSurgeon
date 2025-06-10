@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qdebulois\ByteSurgeon\Surgeon;
 
+use Qdebulois\ByteSurgeon\Dto\ModrmDto;
 use Qdebulois\ByteSurgeon\Enum\AsciiEnum;
 use Qdebulois\ByteSurgeon\Enum\ElfSectionEnum;
 use Qdebulois\ByteSurgeon\Enum\StructModelEnum;
@@ -13,7 +14,7 @@ use Qdebulois\ByteSurgeon\Struct\StructModelFactory;
 
 class Surgeon
 {
-    private int $maxPerLine   = 200;
+    private int $maxPerLine   = 70;
     private mixed $handler    = null;
     private ?string $filename = null;
     private ?int $filesize    = null;
@@ -49,6 +50,16 @@ class Surgeon
     public function close(): void
     {
         fclose($this->handler);
+    }
+
+    public function castByteToStrbin(int $byte): string
+    {
+        return sprintf('%08b', $byte);
+    }
+
+    public function castByteToHex(int $byte): string
+    {
+        return sprintf('%02X', $byte);
     }
 
     public function castBinToChars(string $binary): string
@@ -87,9 +98,7 @@ class Surgeon
         $output    = [];
         $hexs      = [];
         foreach ($binary as $byte) {
-            $hex = dechex($byte);
-            // $hexs[] = '0x'.(1 === strlen($hex) ? '0'.$hex : $hex);
-            $hexs[] = 1 === strlen($hex) ? '0'.$hex : $hex;
+            $hexs[] = $this->castBinToHex($byte);
 
             if (count($hexs) > $this->maxPerLine) {
                 $output[] = implode($delimiter, $hexs);
@@ -99,6 +108,28 @@ class Surgeon
         }
 
         $output[] = implode($delimiter, $hexs);
+
+        return implode("\n", $output);
+    }
+
+    public function castBinToStrbin(string $binary): string
+    {
+        $binary = unpack(StructTypeEnum::UINT8->value.'*', $binary);
+
+        $delimiter = ' ';
+        $output    = [];
+        $strbins      = [];
+        foreach ($binary as $byte) {
+            $strbins[] = $this->castByteToStrbin($byte);
+
+            if (count($strbins) > $this->maxPerLine) {
+                $output[] = implode($delimiter, $strbins);
+
+                $strbins = [];
+            }
+        }
+
+        $output[] = implode($delimiter, $strbins);
 
         return implode("\n", $output);
     }
