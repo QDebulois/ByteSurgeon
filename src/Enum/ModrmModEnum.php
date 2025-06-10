@@ -6,7 +6,11 @@ namespace Qdebulois\ByteSurgeon\Enum;
 
 enum ModrmModEnum: string
 {
-    case DISPLACEMENT = '01';
+    case NO_DISPLACEMENT = '00';
+
+    case DISPLACEMENT8 = '01';
+
+    case DISPLACEMENT32 = '10';
 
     case REGISTER = '11';
 
