@@ -29,8 +29,12 @@ class Main
         // $sectiontextBin = $surgeon->extractSectionBin(ElfSectionEnum::TEXT);
         // echo $surgeon->castBinToHex($sectiontextBin).PHP_EOL;
 
+        echo $surgeon->retrieveSectionsNames().PHP_EOL;
+
         $sectionRodataBin = $surgeon->extractSectionBin(ElfSectionEnum::RODATA);
-        echo $surgeon->castBinToChars($sectionRodataBin).PHP_EOL;
+        if ($sectionRodataBin) {
+            echo $surgeon->castBinToChars($sectionRodataBin).PHP_EOL;
+        }
 
         // $surgeon->writeBytes(ElfSectionEnum::RODATA, 4, ...[0x20, 0x20, 0x46, 0x55, 0x43, 0x4b]);
 

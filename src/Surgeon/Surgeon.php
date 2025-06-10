@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qdebulois\ByteSurgeon\Surgeon;
 
+use Qdebulois\ByteSurgeon\Enum\AsciiEnum;
 use Qdebulois\ByteSurgeon\Enum\ElfSectionEnum;
 use Qdebulois\ByteSurgeon\Enum\StructModelEnum;
 use Qdebulois\ByteSurgeon\Enum\StructTypeEnum;
@@ -12,14 +13,20 @@ use Qdebulois\ByteSurgeon\Struct\StructModelFactory;
 
 class Surgeon
 {
+    private int $maxPerLine   = 200;
     private mixed $handler    = null;
     private ?string $filename = null;
-    private ?int $filesize = null;
+    private ?int $filesize    = null;
     private StructModelFactory $structModelFactory;
 
     public function __construct()
     {
         $this->structModelFactory = new StructModelFactory();
+    }
+
+    public function setMaxPerLine(int $maxPerLine): void
+    {
+        $this->maxPerLine = $maxPerLine;
     }
 
     public function getFilename(): ?string
@@ -48,52 +55,52 @@ class Surgeon
     {
         $binary = unpack(StructTypeEnum::UINT8->value.'*', $binary);
 
-        $str        = [];
-        $line       = [];
-        $maxPerLine = 30;
+        $delimiter = '';
+        $output    = [];
+        $asciis    = [];
         foreach ($binary as $byte) {
-            if ($byte < 0x20 || $byte > 0x7F) {
-                $hex    = dechex($byte);
-                $line[] = '0x'.(1 === strlen($hex) ? '0'.$hex : $hex);
-            } elseif (0x20 === $byte) {
-                $line[] = "'  '";
-            } else {
-                $line[] = '   '.chr($byte);
-            }
+            $asciis[] = AsciiEnum::fromInt($byte);
 
-            if (count($line) > $maxPerLine) {
-                $str[] = implode(' ', $line);
+            if (count($asciis) > $this->maxPerLine) {
+                $output[] = implode(
+                    $delimiter,
+                    array_map(fn (AsciiEnum $ascii) => $ascii->toChar(), $asciis)
+                );
 
-                $line = [];
+                $asciis = [];
             }
         }
 
-        $str[] = implode(' ', $line);
+        $output[] = implode(
+            $delimiter,
+            array_map(fn (AsciiEnum $ascii) => $ascii->toChar(), $asciis)
+        );
 
-        return implode("\n", $str);
+        return implode("\n", $output);
     }
 
     public function castBinToHex(string $binary): string
     {
         $binary = unpack(StructTypeEnum::UINT8->value.'*', $binary);
 
-        $str        = [];
-        $line       = [];
-        $maxPerLine = 30;
+        $delimiter = ' ';
+        $output    = [];
+        $hexs      = [];
         foreach ($binary as $byte) {
-            $hex    = dechex($byte);
-            $line[] = '0x'.(1 === strlen($hex) ? '0'.$hex : $hex);
+            $hex = dechex($byte);
+            // $hexs[] = '0x'.(1 === strlen($hex) ? '0'.$hex : $hex);
+            $hexs[] = 1 === strlen($hex) ? '0'.$hex : $hex;
 
-            if (count($line) > $maxPerLine) {
-                $str[] = implode(' ', $line);
+            if (count($hexs) > $this->maxPerLine) {
+                $output[] = implode($delimiter, $hexs);
 
-                $line = [];
+                $hexs = [];
             }
         }
 
-        $str[] = implode(' ', $line);
+        $output[] = implode($delimiter, $hexs);
 
-        return implode("\n", $str);
+        return implode("\n", $output);
     }
 
     public function retrieveHeadStruct(): Struct
@@ -116,8 +123,16 @@ class Surgeon
         return $elfHeader;
     }
 
-    public function retrieveSectionsNames(string $binaries)
+    public function retrieveSectionsNames()
     {
+        if (null === $this->handler) {
+            throw new \Exception('Load a file first with open()');
+        }
+
+        fseek($this->handler, 0);
+
+        $binaries = fread($this->handler, $this->filesize);
+
         $elfSectionHeader = $this->retrieveSectionStruct();
 
         return substr($binaries, $elfSectionHeader->sh_offset, $elfSectionHeader->sh_size);
@@ -137,7 +152,7 @@ class Surgeon
             throw new \Exception('Failed to read file');
         }
 
-        $elfHeader = $this->retrieveHeadStruct($binaries);
+        $elfHeader = $this->retrieveHeadStruct();
 
         $shstrtab_offset = $elfHeader->e_shoff + $elfHeader->e_shstrndx * $elfHeader->e_shentsize;
 
@@ -148,7 +163,7 @@ class Surgeon
             return $elfSectionHeader;
         }
 
-        $sectionNames = $this->retrieveSectionsNames($binaries);
+        $sectionNames = $this->retrieveSectionsNames();
 
         $isFound = false;
         $target  = $section->value;
@@ -187,19 +202,37 @@ class Surgeon
 
         $elfSectionHeader = $this->retrieveSectionStruct($section);
 
-        return $elfSectionHeader ? substr($binaries, $elfSectionHeader->sh_offset, $elfSectionHeader->sh_size) : null;
+        if (!$elfSectionHeader) {
+            echo "Section {$section->value} not found".PHP_EOL;
+
+            return null;
+        }
+
+        return substr($binaries, $elfSectionHeader->sh_offset, $elfSectionHeader->sh_size);
     }
 
     public function retrieveSectionOffset(ElfSectionEnum $section): ?int
     {
         $elfSectionHeader = $this->retrieveSectionStruct($section);
 
-        return $elfSectionHeader ? $elfSectionHeader->sh_offset : null;
+        if (!$elfSectionHeader) {
+            echo "Section {$section->value} not found".PHP_EOL;
+
+            return null;
+        }
+
+        return $elfSectionHeader->sh_offset;
     }
 
     public function writeBytes(ElfSectionEnum $section, int $offset, int ...$bytes): bool
     {
         $elfSectionOffset = $this->retrieveSectionOffset($section);
+
+        if (null === $elfSectionOffset) {
+            echo "Section {$section->value} not found".PHP_EOL;
+
+            return false;
+        }
 
         fseek($this->handler, $elfSectionOffset + $offset);
 
