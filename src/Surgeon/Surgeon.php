@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Qdebulois\ByteSurgeon\Surgeon;
 
-use Qdebulois\ByteSurgeon\Dto\ModrmDto;
 use Qdebulois\ByteSurgeon\Enum\AsciiEnum;
 use Qdebulois\ByteSurgeon\Enum\ElfSectionEnum;
+use Qdebulois\ByteSurgeon\Enum\OpcodeEnum;
 use Qdebulois\ByteSurgeon\Enum\StructModelEnum;
 use Qdebulois\ByteSurgeon\Enum\StructTypeEnum;
+use Qdebulois\ByteSurgeon\Modrm\Modrm;
 use Qdebulois\ByteSurgeon\Struct\Struct;
 use Qdebulois\ByteSurgeon\Struct\StructModelFactory;
 
@@ -60,6 +61,28 @@ class Surgeon
     public function castByteToHex(int $byte): string
     {
         return sprintf('%02X', $byte);
+    }
+
+    public function castBinToInt(string $binary): string
+    {
+        $binary = unpack(StructTypeEnum::UINT8->value.'*', $binary);
+
+        $delimiter = ' ';
+        $output    = [];
+        $ints      = [];
+        foreach ($binary as $byte) {
+            $ints[] = $byte;
+
+            if (count($ints) > $this->maxPerLine) {
+                $output[] = implode($delimiter, $ints);
+
+                $ints = [];
+            }
+        }
+
+        $output[] = implode($delimiter, $ints);
+
+        return implode("\n", $output);
     }
 
     public function castBinToChars(string $binary): string
@@ -118,7 +141,7 @@ class Surgeon
 
         $delimiter = ' ';
         $output    = [];
-        $strbins      = [];
+        $strbins   = [];
         foreach ($binary as $byte) {
             $strbins[] = $this->castByteToStrbin($byte);
 
@@ -215,6 +238,74 @@ class Surgeon
         }
 
         return $isFound ? $elfSectionHeader : null;
+    }
+
+    public function retrieveOpcodes(): ?string
+    {
+        $elfSectionBinText = $this->extractSectionBin(ElfSectionEnum::TEXT);
+
+        if (!$elfSectionBinText) {
+            echo 'Section TEXT not found'.PHP_EOL;
+
+            return null;
+        }
+
+        $binary = unpack(StructTypeEnum::UINT8->value.'*', $elfSectionBinText);
+
+
+        $opcodes = OpcodeEnum::cases();
+
+        $operations = [];
+        for ($idx = 1; $idx < count($binary); ++$idx) {
+            $offset = $idx - 1;
+            $byte   = $binary[$idx];
+
+
+            foreach ($opcodes as $opcode) {
+                if ($byte !== $opcode->value) {
+                    continue;
+                }
+
+                if (
+                    in_array(
+                        $opcode->name,
+                        [
+                            OpcodeEnum::SYSCALL_PREFIX->name,
+                            OpcodeEnum::JMP_REL32->name,
+                            OpcodeEnum::MOV_REG_IMM8->name,
+                            // OpcodeEnum::MOV_REG_IMM32->name,
+                            OpcodeEnum::ADD_REG_MEM->name,
+                            OpcodeEnum::ADD_REG_MEM_TO_REG->name,
+                        ], // On verra plus tard
+                    )
+                ) {
+                    continue;
+                }
+
+                $operation = '';
+
+                $modrm = new Modrm();
+                $modrm->read($binary[$idx + 1]);
+
+                $operation .= sprintf("%04X : %s ",$offset, $opcode->name);
+
+                $operation .= "{$modrm->getReg()->name} ";
+                $operation .= "{$modrm->getMod()->name} ";
+                $operation .= "{$modrm->getRm()->name}";
+
+                $value = $binary[$idx + 2];
+
+                $operation .= sprintf(",%02X", $value);
+
+                $operations[] = $operation;
+
+                $idx += 2;
+            }
+        }
+
+        echo implode("\n", $operations).PHP_EOL;
+
+        return null;
     }
 
     public function extractSectionBin(ElfSectionEnum $section): ?string

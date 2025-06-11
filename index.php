@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Qdebulois\ByteSurgeon\Enum\ElfSectionEnum;
+use Qdebulois\ByteSurgeon\Enum\OpcodeEnum;
 use Qdebulois\ByteSurgeon\Modrm\Modrm;
 use Qdebulois\ByteSurgeon\Surgeon\Surgeon;
 
@@ -19,11 +20,11 @@ class Main
         }
 
 
-        // $filename = $argv[1];
+        $filename = $argv[1];
 
         $surgeon = new Surgeon();
 
-        // $surgeon->open($filename);
+        $surgeon->open($filename);
 
         // $sectiontextBin = $surgeon->extractSectionBin(ElfSectionEnum::TEXT);
         // echo $surgeon->castBinToHex($sectiontextBin).PHP_EOL;
@@ -36,26 +37,32 @@ class Main
         // }
 
         // $surgeon->writeBytes(ElfSectionEnum::RODATA, 4, ...[0x20, 0x20, 0x46, 0x55, 0x43, 0x4b]);
-
         // $sectionRodataBinPatched = $surgeon->extractSectionBin(ElfSectionEnum::RODATA);
         // echo $surgeon->castBinToChars($sectionRodataBinPatched).PHP_EOL;
-
-        // $surgeon->close();
 
         // Dump its bytes — you’ll spot the ADD instruction in there
         // (e.g., 83 C0 02 = add eax, 0x2)
         // Patch it to 83 E8 02 = sub eax, 0x2
 
-        echo "ModRM".PHP_EOL;
+        $surgeon->retrieveOpcodes();
 
-        $operation = [0x83, 0xC0, 0x02];
+        // echo "ModRM".PHP_EOL;
 
-        $modrm = new Modrm();
-        $modrm->read($operation[1]);
+        // $sectionTextBin = $surgeon->extractSectionBin(ElfSectionEnum::TEXT);
+        // if ($sectionTextBin) {
+        //     echo $surgeon->castBinToHex($sectionTextBin).PHP_EOL;
+        // }
 
-        echo "Mod: {$modrm->getMod()->name}".PHP_EOL;
-        echo "Reg: {$modrm->getReg()->name}".PHP_EOL;
-        echo "Rm: {$modrm->getRm()->name}".PHP_EOL;
+        // $operation = [0x83, 0xC0, 0x02];
+
+        // $modrm = new Modrm();
+        // $modrm->read($operation[1]);
+
+        // echo "Mod: {$modrm->getMod()->name}".PHP_EOL;
+        // echo "Reg: {$modrm->getReg()->name}".PHP_EOL;
+        // echo "Rm: {$modrm->getRm()->name}".PHP_EOL;
+
+        $surgeon->close();
     }
 }
 

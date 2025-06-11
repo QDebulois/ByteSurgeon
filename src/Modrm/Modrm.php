@@ -14,6 +14,12 @@ class Modrm
     private ?ModrmRegEnum $reg = null;
     private ?ModrmRmEnum $rm   = null;
 
+    public function set(ModrmModEnum $mod, ModrmRegEnum $reg, ModrmRmEnum $rm) {
+        $this->mod = $mod;
+        $this->reg = $reg;
+        $this->rm  = $rm;
+    }
+
     public function getMod()
     {
         return $this->mod;
@@ -35,7 +41,11 @@ class Modrm
 
         $this->mod = ModrmModEnum::fromStrbin(substr($strbin, 0, 2));
         $this->reg = ModrmRegEnum::fromStrbin(substr($strbin, 2, 3));
-        $this->rm  = ModrmRmEnum::fromStrbin(substr($strbin, 3, 3));
+        $this->rm  = ModrmRmEnum::fromStrbin(substr($strbin, 5, 3));
+    }
+
+    public function castToInt(): int
+    {
+        return bindec(sprintf('%b', $this->mod).sprintf('%b', $this->reg).sprintf('%b', $this->rm));
     }
 }
-
