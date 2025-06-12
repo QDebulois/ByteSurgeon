@@ -44,7 +44,33 @@ class Main
         // (e.g., 83 C0 02 = add eax, 0x2)
         // Patch it to 83 E8 02 = sub eax, 0x2
 
-        $surgeon->retrieveOpcodes();
+        $foundOpcodes = $surgeon->retrieveOpcodes();
+        $countFoundOpcodes = count($foundOpcodes);
+
+        echo "{$countFoundOpcodes} OPCODES FOUND\n";
+
+        $txtOperations = [];
+        foreach ($foundOpcodes as $foundOpcode) {
+            $textOperation = '';
+            $textOperation .= sprintf('%04X : %s ', $foundOpcode->offset, $foundOpcode->opcode->name);
+
+            if (null !== $foundOpcode->modrm) {
+                $textOperation .= "{$foundOpcode->modrm->getReg()->name} ";
+                $textOperation .= "{$foundOpcode->modrm->getMod()->name} ";
+                $textOperation .= "{$foundOpcode->modrm->getRm()->name}";
+            }
+
+            if (count($foundOpcode->values)) {
+                $hexValue = implode('', array_map(fn ($v) => sprintf('%02X', $v), $foundOpcode->values));
+                $textOperation .= sprintf(",0x%s", $hexValue);
+            }
+
+            $txtOperations[] = $textOperation;
+        }
+
+        echo implode("\n", $txtOperations).PHP_EOL;
+
+        // print_r($surgeon->retrieveOpcodes());
 
         // echo "ModRM".PHP_EOL;
 

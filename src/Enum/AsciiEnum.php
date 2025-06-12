@@ -549,14 +549,18 @@ enum AsciiEnum: int
 
     public static function fromChar(string $char): ?self
     {
+        if (strlen($char) !== 1) {
+            throw new \Exception('Invalid char');
+        }
+
         $ord = ord($char);
 
         return self::tryFrom($ord);
     }
 
-    public static function fromInt(int $int): ?self
+    public static function fromByte(int $byte): ?self
     {
-        return self::tryFrom($int);
+        return self::tryFrom($byte);
     }
 
     public static function map(): array

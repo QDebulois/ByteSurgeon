@@ -9,9 +9,13 @@ namespace Qdebulois\ByteSurgeon\Enum;
  */
 enum OpcodeSyscallEnum: int
 {
-    case SYSCALL = 0x05;
+    case SYSCALL = 0x05; // Appel système rapide AMD64 (x86_64)
 
-    case SYSENTER = 0x34;
+    case SYSENTER = 0x34; // Appel système rapide Intel (x86 32-bit)
+
+    CASE SYSEXIT =	0x35;	// Retour rapide depuis syscall (Intel)
+
+    CASE SYSRET	 = 0x07; //	Retour rapide syscall (AMD64)
 
     public static function fromInt(int $byte): ?self
     {

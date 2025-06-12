@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Qdebulois\ByteSurgeon\Surgeon;
 
+use Qdebulois\ByteSurgeon\Dto\FoundOpcodeDto;
 use Qdebulois\ByteSurgeon\Enum\AsciiEnum;
 use Qdebulois\ByteSurgeon\Enum\ElfSectionEnum;
 use Qdebulois\ByteSurgeon\Enum\OpcodeEnum;
+use Qdebulois\ByteSurgeon\Enum\OpcodeSyscallEnum;
 use Qdebulois\ByteSurgeon\Enum\StructModelEnum;
 use Qdebulois\ByteSurgeon\Enum\StructTypeEnum;
 use Qdebulois\ByteSurgeon\Modrm\Modrm;
@@ -15,10 +17,10 @@ use Qdebulois\ByteSurgeon\Struct\StructModelFactory;
 
 class Surgeon
 {
-    private int $maxPerLine   = 70;
-    private mixed $handler    = null;
-    private ?string $filename = null;
-    private ?int $filesize    = null;
+    private int $maxColPerLine = 70;
+    private mixed $handler     = null;
+    private ?string $filename  = null;
+    private ?int $filesize     = null;
     private StructModelFactory $structModelFactory;
 
     public function __construct()
@@ -26,9 +28,9 @@ class Surgeon
         $this->structModelFactory = new StructModelFactory();
     }
 
-    public function setMaxPerLine(int $maxPerLine): void
+    public function setMaxColPerLine(int $maxColPerLine): void
     {
-        $this->maxPerLine = $maxPerLine;
+        $this->maxColPerLine = $maxColPerLine;
     }
 
     public function getFilename(): ?string
@@ -73,7 +75,7 @@ class Surgeon
         foreach ($binary as $byte) {
             $ints[] = $byte;
 
-            if (count($ints) > $this->maxPerLine) {
+            if (count($ints) > $this->maxColPerLine) {
                 $output[] = implode($delimiter, $ints);
 
                 $ints = [];
@@ -93,9 +95,9 @@ class Surgeon
         $output    = [];
         $asciis    = [];
         foreach ($binary as $byte) {
-            $asciis[] = AsciiEnum::fromInt($byte);
+            $asciis[] = AsciiEnum::fromByte($byte);
 
-            if (count($asciis) > $this->maxPerLine) {
+            if (count($asciis) > $this->maxColPerLine) {
                 $output[] = implode(
                     $delimiter,
                     array_map(fn (AsciiEnum $ascii) => $ascii->toChar(), $asciis)
@@ -123,7 +125,7 @@ class Surgeon
         foreach ($binary as $byte) {
             $hexs[] = $this->castBinToHex($byte);
 
-            if (count($hexs) > $this->maxPerLine) {
+            if (count($hexs) > $this->maxColPerLine) {
                 $output[] = implode($delimiter, $hexs);
 
                 $hexs = [];
@@ -145,7 +147,7 @@ class Surgeon
         foreach ($binary as $byte) {
             $strbins[] = $this->castByteToStrbin($byte);
 
-            if (count($strbins) > $this->maxPerLine) {
+            if (count($strbins) > $this->maxColPerLine) {
                 $output[] = implode($delimiter, $strbins);
 
                 $strbins = [];
@@ -240,72 +242,93 @@ class Surgeon
         return $isFound ? $elfSectionHeader : null;
     }
 
-    public function retrieveOpcodes(): ?string
+    /** @return FoundOpcodeDto[] */
+    public function retrieveOpcodes(): array
     {
         $elfSectionBinText = $this->extractSectionBin(ElfSectionEnum::TEXT);
 
         if (!$elfSectionBinText) {
             echo 'Section TEXT not found'.PHP_EOL;
 
-            return null;
+            return [];
         }
 
         $binary = unpack(StructTypeEnum::UINT8->value.'*', $elfSectionBinText);
 
-
         $opcodes = OpcodeEnum::cases();
 
-        $operations = [];
+        $foundOpcodes  = [];
         for ($idx = 1; $idx < count($binary); ++$idx) {
             $offset = $idx - 1;
             $byte   = $binary[$idx];
-
 
             foreach ($opcodes as $opcode) {
                 if ($byte !== $opcode->value) {
                     continue;
                 }
 
-                if (
-                    in_array(
-                        $opcode->name,
-                        [
-                            OpcodeEnum::SYSCALL_PREFIX->name,
-                            OpcodeEnum::JMP_REL32->name,
-                            OpcodeEnum::MOV_REG_IMM8->name,
-                            // OpcodeEnum::MOV_REG_IMM32->name,
-                            OpcodeEnum::ADD_REG_MEM->name,
-                            OpcodeEnum::ADD_REG_MEM_TO_REG->name,
-                        ], // On verra plus tard
-                    )
-                ) {
+                if (OpcodeEnum::SYSCALL_PREFIX === $opcode) {
+                    $opcodesSyscall = OpcodeSyscallEnum::cases();
+
+                    $nextByte = $binary[$idx + 1];
+
+                    $opcodeSyscall = null;
+
+                    foreach ($opcodesSyscall as $os) {
+                        if ($nextByte === $os->value) {
+                            $opcodeSyscall = $opcodeSyscall;
+
+                            break;
+                        }
+                    }
+
+                    if (!$opcodeSyscall) {
+                        continue;
+                    }
+
+                    $foundOpcode                = new FoundOpcodeDto();
+                    $foundOpcode->offset        = $offset;
+                    $foundOpcode->opcode        = $opcode;
+                    $foundOpcode->opcodeSyscall = $opcodeSyscall;
+
+                    $foundOpcodes[] = $foundOpcode;
+
                     continue;
                 }
 
-                $operation = '';
+                if (OpcodeEnum::ARITHMETIC_IMM8 === $opcode) {
+                    $modrmByte = $binary[$idx + 1];
 
-                $modrm = new Modrm();
-                $modrm->read($binary[$idx + 1]);
+                    $modrm = new Modrm();
+                    $modrm->read($modrmByte);
 
-                $operation .= sprintf("%04X : %s ",$offset, $opcode->name);
+                    $values     = [];
+                    $startValue = $idx + 2;
+                    $endvalue   = $startValue + $modrm->getValueLength();
+                    for ($i = $startValue; $i < $endvalue; ++$i) {
+                        $values[] = $binary[$i];
+                    }
 
-                $operation .= "{$modrm->getReg()->name} ";
-                $operation .= "{$modrm->getMod()->name} ";
-                $operation .= "{$modrm->getRm()->name}";
+                    $foundOpcode         = new FoundOpcodeDto();
+                    $foundOpcode->offset = $offset;
+                    $foundOpcode->opcode = $opcode;
+                    $foundOpcode->modrm  = $modrm;
+                    $foundOpcode->values  = array_reverse($values); // Penser au retour en Big endian
 
-                $value = $binary[$idx + 2];
+                    $foundOpcodes[] = $foundOpcode;
 
-                $operation .= sprintf(",%02X", $value);
+                    continue;
+                }
 
-                $operations[] = $operation;
+                $foundOpcode         = new FoundOpcodeDto();
+                $foundOpcode->offset = $offset;
+                $foundOpcode->opcode = $opcode;
 
-                $idx += 2;
+                $foundOpcodes[] = $foundOpcode;
             }
         }
 
-        echo implode("\n", $operations).PHP_EOL;
-
-        return null;
+        return $foundOpcodes;
     }
 
     public function extractSectionBin(ElfSectionEnum $section): ?string
