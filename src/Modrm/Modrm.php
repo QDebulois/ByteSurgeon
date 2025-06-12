@@ -73,11 +73,11 @@ class Modrm
             ++$length;
         }
 
-        if (ModrmModEnum::MEMORY_OFFSET8 == $this->mod) {
+        if (ModrmModEnum::MEMORY_OFFSET8 === $this->mod) {
             ++$length;
-        } elseif (ModrmModEnum::MEMORY_OFFSET32 == $this->mod) {
+        } elseif (ModrmModEnum::MEMORY_OFFSET32 === $this->mod) {
             $length += 4;
-        } elseif (ModrmModEnum::MEMORY_NO_OFFSET == $this->mod && ModrmRmEnum::EBP == $this->rm) {
+        } elseif (ModrmModEnum::MEMORY_NO_OFFSET === $this->mod && ModrmRmEnum::EBP === $this->rm) {
             $length += 4;
         }
 

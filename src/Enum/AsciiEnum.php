@@ -4,84 +4,116 @@ declare(strict_types=1);
 
 namespace Qdebulois\ByteSurgeon\Enum;
 
-// https://en.wikipedia.org/wiki/ASCII
+/** https://en.wikipedia.org/wiki/ASCII */
 enum AsciiEnum: int
 {
     // Control characters (0x00–0x1F)
 
-    case NUL = 0x00; // Null character
+    /** Null character */
+    case NUL = 0x00;
 
-    case SOH = 0x01; // Start of Heading
+    /** Start of Heading */
+    case SOH = 0x01;
 
-    case STX = 0x02; // Start of Text
+    /** Start of Text */
+    case STX = 0x02;
 
-    case ETX = 0x03; // End of Text
+    /** End of Text */
+    case ETX = 0x03;
 
-    case EOT = 0x04; // End of Transmission
+    /** End of Transmission */
+    case EOT = 0x04;
 
-    case ENQ = 0x05; // Enquiry
+    /** Enquiry */
+    case ENQ = 0x05;
 
-    case ACK = 0x06; // Acknowledge
+    /** Acknowledge */
+    case ACK = 0x06;
 
-    case BEL = 0x07; // Bell
+    /** Bell */
+    case BEL = 0x07;
 
-    case BS = 0x08; // Backspace
+    /** Backspace */
+    case BS = 0x08;
 
-    case HT = 0x09; // Horizontal Tab
+    /** Horizontal Tab */
+    case HT = 0x09;
 
-    case LF = 0x0A; // Line Feed
+    /** Line Feed */
+    case LF = 0x0A;
 
-    case VT = 0x0B; // Vertical Tab
+    /** Vertical Tab */
+    case VT = 0x0B;
 
-    case FF = 0x0C; // Form Feed
+    /** Form Feed */
+    case FF = 0x0C;
 
-    case CR = 0x0D; // Carriage Return
+    /** Carriage Return */
+    case CR = 0x0D;
 
-    case SO = 0x0E; // Shift Out
+    /** Shift Out */
+    case SO = 0x0E;
 
-    case SI = 0x0F; // Shift In
+    /** Shift In */
+    case SI = 0x0F;
 
-    case DLE = 0x10; // Data Link Escape
+    /** Data Link Escape */
+    case DLE = 0x10;
 
-    case DC1 = 0x11; // Device Control 1
+    /** Device Control 1 */
+    case DC1 = 0x11;
 
-    case DC2 = 0x12; // Device Control 2
+    /** Device Control 2 */
+    case DC2 = 0x12;
 
-    case DC3 = 0x13; // Device Control 3
+    /** Device Control 3 */
+    case DC3 = 0x13;
 
-    case DC4 = 0x14; // Device Control 4
+    /** Device Control 4 */
+    case DC4 = 0x14;
 
-    case NAK = 0x15; // Negative Acknowledge
+    /** Negative Acknowledge */
+    case NAK = 0x15;
 
-    case SYN = 0x16; // Synchronous Idle
+    /** Synchronous Idle */
+    case SYN = 0x16;
 
-    case ETB = 0x17; // End of Transmission Block
+    /** End of Transmission Block */
+    case ETB = 0x17;
 
-    case CAN = 0x18; // Cancel
+    /** Cancel */
+    case CAN = 0x18;
 
-    case EM = 0x19; // End of Medium
+    /** End of Medium */
+    case EM = 0x19;
 
-    case SUB = 0x1A; // Substitute
+    /** Substitute */
+    case SUB = 0x1A;
 
-    case ESC = 0x1B; // Escape
+    /** Escape */
+    case ESC = 0x1B;
 
-    case FS = 0x1C; // File Separator
+    /** File Separator */
+    case FS = 0x1C;
 
-    case GS = 0x1D; // Group Separator
+    /** Group Separator */
+    case GS = 0x1D;
 
-    case RS = 0x1E; // Record Separator
+    /** Record Separator */
+    case RS = 0x1E;
 
-    case US = 0x1F; // Unit Separator
+    /** Unit Separator */
+    case US = 0x1F;
 
     // Printable characters (0x20–0x7E)
 
     case SPACE = 0x20;
 
-    case EXCLAMATION_MARK = 0x21; // !
+    case EXCLAMATION_MARK = 0x21;
 
-    case DOUBLE_QUOTE = 0x22; // "
+    case DOUBLE_QUOTE = 0x22;
 
-    case HASH = 0x23; // #
+    case HASH = 0x23;
 
     case DOLLAR = 0x24;
 
@@ -89,7 +121,7 @@ enum AsciiEnum: int
 
     case AMPERSAND = 0x26;
 
-    case SINGLE_QUOTE = 0x27; // '
+    case SINGLE_QUOTE = 0x27;
 
     case LEFT_PARENTHESIS = 0x28;
 
@@ -549,7 +581,7 @@ enum AsciiEnum: int
 
     public static function fromChar(string $char): ?self
     {
-        if (strlen($char) !== 1) {
+        if (1 !== strlen($char)) {
             throw new \Exception('Invalid char');
         }
 

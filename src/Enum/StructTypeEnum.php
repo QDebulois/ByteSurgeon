@@ -8,85 +8,85 @@ enum StructTypeEnum: string
 {
     // STRINGS
 
-    // char[] - ASCII string, padded with NULLs
+    /** char[] - ASCII string, padded with NULLs */
     case CHAR_ARRAY_NULL_PADDED = 'a';
 
-    // char[] - ASCII string, padded with spaces
+    /** char[] - ASCII string, padded with spaces */
     case CHAR_ARRAY_SPACE_PADDED = 'A';
 
-    // char[] - Hex string, low nibble first (half-byte per char)
+    /** char[] - Hex string, low nibble first (half-byte per char) */
     case HEX_STRING_REVERSE = 'h';
 
-    // char[] - Hex string, high nibble first (half-byte per char)
+    /** char[] - Hex string, high nibble first (half-byte per char) */
     case HEX_STRING = 'H';
 
     // 8-BIT INTEGERS
 
-    // int8_t - 8-bit signed integer
+    /** int8_t - 8-bit signed integer */
     case INT8 = 'c';
 
-    // uint8_t - 8-bit unsigned integer
+    /** uint8_t - 8-bit unsigned integer */
     case UINT8 = 'C';
 
     // 16-BIT INTEGERS
 
-    // int16_t - 16-bit signed integer (machine endian)
+    /** int16_t - 16-bit signed integer (machine endian) */
     case INT16 = 's';
 
-    // uint16_t - 16-bit unsigned integer (machine endian)
+    /** uint16_t - 16-bit unsigned integer (machine endian) */
     case UINT16 = 'S';
 
-    // uint16_t - 16-bit unsigned integer (big-endian)
+    /** uint16_t - 16-bit unsigned integer (big-endian) */
     case UINT16_BE = 'n';
 
-    // uint16_t - 16-bit unsigned integer (little-endian)
+    /** uint16_t - 16-bit unsigned integer (little-endian) */
     case UINT16_LE = 'v';
 
     // 32-BIT INTEGERS
 
-    // int32_t - 32-bit signed integer (machine endian)
+    /** int32_t - 32-bit signed integer (machine endian) */
     case INT32 = 'i';
 
-    // uint32_t - 32-bit unsigned integer (machine endian)
+    /** uint32_t - 32-bit unsigned integer (machine endian) */
     case UINT32 = 'I';
 
-    // int32_t - long signed integer (machine endian)
+    /** int32_t - long signed integer (machine endian) */
     case INT32_LONG = 'l';
 
-    // uint32_t - long unsigned integer (machine endian)
+    /** uint32_t - long unsigned integer (machine endian) */
     case UINT32_LONG = 'L';
 
-    // uint32_t - 32-bit unsigned integer (big-endian)
+    /** uint32_t - 32-bit unsigned integer (big-endian) */
     case UINT32_BE = 'N';
 
-    // uint32_t - 32-bit unsigned integer (little-endian)
+    /** uint32_t - 32-bit unsigned integer (little-endian) */
     case UINT32_LE = 'V';
 
     // 64-BIT INTEGERS
 
-    // int64_t - 64-bit signed integer (machine endian)
+    /** int64_t - 64-bit signed integer (machine endian) */
     case INT64 = 'q';
 
-    // uint64_t - 64-bit unsigned integer (machine endian)
+    /** uint64_t - 64-bit unsigned integer (machine endian) */
     case UINT64 = 'Q';
 
-    // FLOATING POINTS
+    // FLOAT
 
-    // float - 32-bit float (machine endian)
+    /** float - 32-bit float (machine endian) */
     case FLOAT32 = 'f';
 
-    // double - 64-bit float (machine endian)
+    /** double - 64-bit float (machine endian) */
     case FLOAT64 = 'd';
 
     // SPECIAL
 
-    // pad byte - skip 1 byte
+    /** pad byte - skip 1 byte */
     case PADDING = 'x';
 
-    // rewind byte - move pointer back 1 byte
+    /** rewind byte - move pointer back 1 byte */
     case REWIND = 'X';
 
-    // set absolute offset (seek to byte position)
+    /** set absolute offset (seek to byte position) */
     case ABSOLUTE_OFFSET = '@';
 
     public function sizeOf(): ?int

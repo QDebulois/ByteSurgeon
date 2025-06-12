@@ -10,9 +10,11 @@ enum ModrmRegEnum: int
 
     case OR = 0b00000001;
 
-    case ADC = 0b00000010; // Add with carry
+    /** Add with carry */
+    case ADC = 0b00000010;
 
-    case SBB = 0b00000011; // Sub with borrow
+    /** Sub with borrow */
+    case SBB = 0b00000011;
 
     case AND = 0b00000100;
 
