@@ -11,7 +11,7 @@ Byte surgeon, to operate on ELF in PHP 🐘💉
 
 ## Dependencies
 
-- todo
+- phpunit/phpunit
 
 ## Quick Start
 
@@ -20,4 +20,4 @@ $ todo
 ```
 ## References
 
-- todo
+- [https://wiki.osdev.org/X86-64_Instruction_Encoding#Legacy_Prefixes](X86-64 Instruction Encoding)

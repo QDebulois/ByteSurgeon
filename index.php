@@ -26,8 +26,10 @@ class Main
 
         $surgeon->open($filename);
 
-        // $sectiontextBin = $surgeon->extractSectionBin(ElfSectionEnum::TEXT);
-        // echo $surgeon->castBinToHex($sectiontextBin).PHP_EOL;
+        $sectiontextBin = $surgeon->extractSectionBin(ElfSectionEnum::TEXT);
+        if ($sectiontextBin) {
+            echo $surgeon->castBinToHex($sectiontextBin).PHP_EOL;
+        }
 
         // echo $surgeon->retrieveSectionsNames().PHP_EOL;
 

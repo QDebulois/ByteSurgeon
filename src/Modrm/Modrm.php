@@ -67,6 +67,10 @@ class Modrm
             throw new \Exception('Modrm is not populated');
         }
 
+        if ($this->mod === ModrmModEnum::REGISTER) {
+            return 0;
+        }
+
         $length = 1;
 
         if ($this->hasSib()) {

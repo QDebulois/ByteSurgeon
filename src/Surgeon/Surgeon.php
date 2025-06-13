@@ -123,7 +123,7 @@ class Surgeon
         $output    = [];
         $hexs      = [];
         foreach ($binary as $byte) {
-            $hexs[] = $this->castBinToHex($byte);
+            $hexs[] = $this->castByteToHex($byte);
 
             if (count($hexs) > $this->maxColPerLine) {
                 $output[] = implode($delimiter, $hexs);
@@ -257,7 +257,7 @@ class Surgeon
 
         $opcodes = OpcodeEnum::cases();
 
-        $foundOpcodes  = [];
+        $foundOpcodes = [];
         for ($idx = 1; $idx < count($binary); ++$idx) {
             $offset = $idx - 1;
             $byte   = $binary[$idx];
@@ -267,12 +267,36 @@ class Surgeon
                     continue;
                 }
 
+                if (OpcodeEnum::ARITHMETIC_IMM8 === $opcode) {
+                    $modrmByte = $binary[$idx + 1];
+
+                    $modrm = new Modrm();
+                    $modrm->read($modrmByte);
+
+                    $values     = [];
+                    $startValue = $idx + 2;
+                    $nextOpcodeIdx   = $startValue + $modrm->getValueLength();
+                    for ($i = $startValue; $i < $nextOpcodeIdx; ++$i) {
+                        $values[] = $binary[$i];
+                    }
+
+                    $foundOpcode         = new FoundOpcodeDto();
+                    $foundOpcode->offset = $offset;
+                    $foundOpcode->opcode = $opcode;
+                    $foundOpcode->modrm  = $modrm;
+                    $foundOpcode->values = array_reverse($values); // Penser au retour en Big endian
+
+                    $foundOpcodes[] = $foundOpcode;
+
+                    $idx = $nextOpcodeIdx;
+
+                    continue;
+                }
+
                 if (OpcodeEnum::SYSCALL_PREFIX === $opcode) {
                     $opcodesSyscall = OpcodeSyscallEnum::cases();
-
-                    $nextByte = $binary[$idx + 1];
-
-                    $opcodeSyscall = null;
+                    $opcodeSyscall  = null;
+                    $nextByte       = $binary[$idx + 1];
 
                     foreach ($opcodesSyscall as $os) {
                         if ($nextByte === $os->value) {
@@ -296,29 +320,6 @@ class Surgeon
                     continue;
                 }
 
-                if (OpcodeEnum::ARITHMETIC_IMM8 === $opcode) {
-                    $modrmByte = $binary[$idx + 1];
-
-                    $modrm = new Modrm();
-                    $modrm->read($modrmByte);
-
-                    $values     = [];
-                    $startValue = $idx + 2;
-                    $endvalue   = $startValue + $modrm->getValueLength();
-                    for ($i = $startValue; $i < $endvalue; ++$i) {
-                        $values[] = $binary[$i];
-                    }
-
-                    $foundOpcode         = new FoundOpcodeDto();
-                    $foundOpcode->offset = $offset;
-                    $foundOpcode->opcode = $opcode;
-                    $foundOpcode->modrm  = $modrm;
-                    $foundOpcode->values  = array_reverse($values); // Penser au retour en Big endian
-
-                    $foundOpcodes[] = $foundOpcode;
-
-                    continue;
-                }
 
                 $foundOpcode         = new FoundOpcodeDto();
                 $foundOpcode->offset = $offset;
