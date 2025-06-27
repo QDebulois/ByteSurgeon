@@ -46,6 +46,8 @@ class Main
         // (e.g., 83 C0 02 = add eax, 0x2)
         // Patch it to 83 E8 02 = sub eax, 0x2
 
+        // [Préfixes] [VEX|XOP] [Opcode] [ModR/M] [SIB] [Déplacement] [Données immédiates]
+
         $foundOpcodes = $surgeon->retrieveOpcodes();
         $countFoundOpcodes = count($foundOpcodes);
 
@@ -60,6 +62,10 @@ class Main
                 $textOperation .= "{$foundOpcode->modrm->getReg()->name} ";
                 $textOperation .= "{$foundOpcode->modrm->getMod()->name} ";
                 $textOperation .= "{$foundOpcode->modrm->getRm()->name}";
+
+                if ($foundOpcode->modrm->hasSib()) {
+                    $textOperation .= ' SIB';
+                }
             }
 
             if (count($foundOpcode->values)) {

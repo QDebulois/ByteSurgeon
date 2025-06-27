@@ -10,6 +10,7 @@ enum OpcodeLegacyPrefixEnum: int
 
     case LOCK = 0xF0;
 
+    /** Repete jusqu'a echec */
     case REPNE_REPNZ = 0xF2;
 
     /**  REP or REPE/REPZ prefix */
@@ -34,6 +35,7 @@ enum OpcodeLegacyPrefixEnum: int
 
     // Prefix group 3
 
+    /** Passe de 32-bit -> 16-bit operand size */
     case OPERAND_SIZE = 0x66;
 
     // Prefix group 4

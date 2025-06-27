@@ -267,32 +267,6 @@ class Surgeon
                     continue;
                 }
 
-                if (OpcodeEnum::ARITHMETIC_IMM8 === $opcode) {
-                    $modrmByte = $binary[$idx + 1];
-
-                    $modrm = new Modrm();
-                    $modrm->read($modrmByte);
-
-                    $values     = [];
-                    $startValue = $idx + 2;
-                    $nextOpcodeIdx   = $startValue + $modrm->getValueLength();
-                    for ($i = $startValue; $i < $nextOpcodeIdx; ++$i) {
-                        $values[] = $binary[$i];
-                    }
-
-                    $foundOpcode         = new FoundOpcodeDto();
-                    $foundOpcode->offset = $offset;
-                    $foundOpcode->opcode = $opcode;
-                    $foundOpcode->modrm  = $modrm;
-                    $foundOpcode->values = array_reverse($values); // Penser au retour en Big endian
-
-                    $foundOpcodes[] = $foundOpcode;
-
-                    $idx = $nextOpcodeIdx;
-
-                    continue;
-                }
-
                 if (OpcodeEnum::SYSCALL_PREFIX === $opcode) {
                     $opcodesSyscall = OpcodeSyscallEnum::cases();
                     $opcodeSyscall  = null;
@@ -320,6 +294,31 @@ class Surgeon
                     continue;
                 }
 
+                if (OpcodeEnum::ARITHMETIC_IMM8 === $opcode) {
+                    $modrmByte = $binary[$idx + 1];
+
+                    $modrm = new Modrm();
+                    $modrm->read($modrmByte);
+
+                    $values        = [];
+                    $startValue    = $idx + 2;
+                    $nextOpcodeIdx = $startValue + $modrm->getValueLength();
+                    for ($i = $startValue; $i < $nextOpcodeIdx; ++$i) {
+                        $values[] = $binary[$i];
+                    }
+
+                    $foundOpcode         = new FoundOpcodeDto();
+                    $foundOpcode->offset = $offset;
+                    $foundOpcode->opcode = $opcode;
+                    $foundOpcode->modrm  = $modrm;
+                    $foundOpcode->values = array_reverse($values); // Penser au retour en Big endian
+
+                    $foundOpcodes[] = $foundOpcode;
+
+                    $idx = $nextOpcodeIdx;
+
+                    continue;
+                }
 
                 $foundOpcode         = new FoundOpcodeDto();
                 $foundOpcode->offset = $offset;

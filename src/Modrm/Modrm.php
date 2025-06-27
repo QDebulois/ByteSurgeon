@@ -20,6 +20,8 @@ class Modrm
         $this->mod = $mod;
         $this->reg = $reg;
         $this->rm  = $rm;
+
+        $this->isPopulated = true;
     }
 
     public function getMod(): ?ModrmModEnum
@@ -67,7 +69,7 @@ class Modrm
             throw new \Exception('Modrm is not populated');
         }
 
-        if ($this->mod === ModrmModEnum::REGISTER) {
+        if (ModrmModEnum::REGISTER === $this->mod) {
             return 0;
         }
 
