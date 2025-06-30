@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace ByteSurgeon\Enum;
+namespace Qdebulois\ByteSurgeon\Enum;
 
-enum OpcodeLegacyPrefixEnum: int
+enum OpcodePrefixEnum: int
 {
     // Prefix group 1
 
@@ -33,12 +33,28 @@ enum OpcodeLegacyPrefixEnum: int
     /** segment override */
     case FS = 0x64;
 
+    /** segment override */
+    // case FS = 0x65; // TODO
+
+    // case BRANCH_HINT_1 = 0x2E; // TODO
+    // case BRANCH_HINT_2 = 0x3E; // TODO
+
     // Prefix group 3
 
     /** Passe de 32-bit -> 16-bit operand size */
-    case OPERAND_SIZE = 0x66;
+    case OPERAND_SIZE_OVERRIDE = 0x66;
 
     // Prefix group 4
 
-    case ADDRESS_SIZE = 0x67;
+    case ADDRESS_SIZE_OVERRIDE = 0x67;
+
+    public static function map() {
+        $map = [];
+
+        foreach (self::cases() as $case) {
+            $map[$case->value] = $case->name;
+        }
+
+        return $map;
+    }
 }

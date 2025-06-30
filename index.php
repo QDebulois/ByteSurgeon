@@ -48,35 +48,35 @@ class Main
 
         // [Préfixes] [VEX|XOP] [Opcode] [ModR/M] [SIB] [Déplacement] [Données immédiates]
 
-        $foundOpcodes = $surgeon->retrieveOpcodes();
-        $countFoundOpcodes = count($foundOpcodes);
+        $foundInstructions = $surgeon->retrieveOpcodes();
+        $countFoundOpcodes = count($foundInstructions);
 
-        echo "{$countFoundOpcodes} OPCODES FOUND\n";
+        // echo "{$countFoundOpcodes} OPCODES FOUND\n";
 
-        $txtOperations = [];
-        foreach ($foundOpcodes as $foundOpcode) {
-            $textOperation = '';
-            $textOperation .= sprintf('%04X : %s ', $foundOpcode->offset, $foundOpcode->opcode->name);
+        // $txtOperations = [];
+        // foreach ($foundInstructions as $foundOpcode) {
+        //     $textOperation = '';
+        //     $textOperation .= sprintf('%04X : %s ', $foundOpcode->offset, $foundOpcode->opcode->name);
 
-            if (null !== $foundOpcode->modrm) {
-                $textOperation .= "{$foundOpcode->modrm->getReg()->name} ";
-                $textOperation .= "{$foundOpcode->modrm->getMod()->name} ";
-                $textOperation .= "{$foundOpcode->modrm->getRm()->name}";
+        //     if (null !== $foundOpcode->modrm) {
+        //         $textOperation .= "{$foundOpcode->modrm->getReg()->name} ";
+        //         $textOperation .= "{$foundOpcode->modrm->getMod()->name} ";
+        //         $textOperation .= "{$foundOpcode->modrm->getRm()->name}";
 
-                if ($foundOpcode->modrm->hasSib()) {
-                    $textOperation .= ' SIB';
-                }
-            }
+        //         if ($foundOpcode->modrm->hasSib()) {
+        //             $textOperation .= ' SIB';
+        //         }
+        //     }
 
-            if (count($foundOpcode->values)) {
-                $hexValue = implode('', array_map(fn ($v) => sprintf('%02X', $v), $foundOpcode->values));
-                $textOperation .= sprintf(",0x%s", $hexValue);
-            }
+        //     if (count($foundOpcode->values)) {
+        //         $hexValue = implode('', array_map(fn ($v) => sprintf('%02X', $v), $foundOpcode->values));
+        //         $textOperation .= sprintf(",0x%s", $hexValue);
+        //     }
 
-            $txtOperations[] = $textOperation;
-        }
+        //     $txtOperations[] = $textOperation;
+        // }
 
-        echo implode("\n", $txtOperations).PHP_EOL;
+        // echo implode("\n", $txtOperations).PHP_EOL;
 
         // print_r($surgeon->retrieveOpcodes());
 
